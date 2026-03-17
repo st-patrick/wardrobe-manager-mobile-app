@@ -1,0 +1,43 @@
+{
+  "expo": {
+    "name": "Wardrobe Manager Mobile",
+    "slug": "wardrobe-manager-mobile",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "Allow Wardrobe Manager to take photos of your clothes."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#ffffff"
+      }
+    },
+    "web": {
+      "bundler": "metro"
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Wardrobe Manager to take photos of your clothes."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Wardrobe Manager to use photos for wardrobe and try-on.",
+          "cameraPermission": "Allow Wardrobe Manager to capture photos for wardrobe and try-on."
+        }
+      ]
+    ]
+  }
+}
