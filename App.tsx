@@ -1333,6 +1333,7 @@ export default function App() {
   const [isBootstrapping, setIsBootstrapping] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
+  const [showAddMenu, setShowAddMenu] = useState(false);
   const [isClassifying, setIsClassifying] = useState(false);
 
   const [classificationProgress, setClassificationProgress] = useState({ done: 0, total: 0 });
@@ -1656,6 +1657,7 @@ export default function App() {
 
       const savedItem = await createWardrobeItemFromSourceUri(shot.uri);
       commitItems((current) => [savedItem, ...current]);
+      setActiveTab('wardrobe');
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : 'Unable to save photo.');
     } finally {
@@ -2440,6 +2442,9 @@ export default function App() {
         <View style={styles.cameraContainer}>
           <CameraView ref={cameraRef} style={styles.camera} mode="picture" />
           <View style={styles.overlayTop}>
+            <Pressable style={styles.cameraBackButton} onPress={() => setActiveTab('wardrobe')}>
+              <Text style={styles.cameraBackButtonText}>Back</Text>
+            </Pressable>
             <Text style={styles.overlayText}>{items.length} in wardrobe</Text>
           </View>
           <View style={styles.overlayBottom}>
@@ -2491,18 +2496,36 @@ export default function App() {
           ) : null}
         </View>
         <View style={styles.gridHeaderRight}>
-          <Pressable style={styles.gridHeaderButton} onPress={() => setActiveTab('camera')}>
+          <Pressable style={styles.gridHeaderButton} onPress={() => setShowAddMenu((v) => !v)}>
             <Text style={styles.gridHeaderButtonText}>+</Text>
-          </Pressable>
-          <Pressable
-            style={[styles.gridHeaderButton, isImporting ? styles.gridHeaderButtonDisabled : null]}
-            onPress={handleAddFromPhotos}
-            disabled={isImporting}
-          >
-            <Text style={styles.gridHeaderButtonText}>{isImporting ? '...' : 'Import'}</Text>
           </Pressable>
         </View>
       </View>
+
+      {/* Add menu dropdown */}
+      {showAddMenu ? (
+        <View style={styles.addMenuDropdown}>
+          <Pressable
+            style={styles.addMenuOption}
+            onPress={() => {
+              setShowAddMenu(false);
+              setActiveTab('camera');
+            }}
+          >
+            <Text style={styles.addMenuOptionText}>Take Photo</Text>
+          </Pressable>
+          <Pressable
+            style={[styles.addMenuOption, isImporting ? styles.addMenuOptionDisabled : null]}
+            onPress={() => {
+              setShowAddMenu(false);
+              handleAddFromPhotos();
+            }}
+            disabled={isImporting}
+          >
+            <Text style={styles.addMenuOptionText}>{isImporting ? 'Importing...' : 'Choose from Library'}</Text>
+          </Pressable>
+        </View>
+      ) : null}
 
       {/* Zoom hint */}
       <View style={styles.zoomHintRow}>
@@ -2546,6 +2569,7 @@ export default function App() {
       <ScrollView
         contentContainerStyle={styles.gridScrollContent}
         showsVerticalScrollIndicator={false}
+        onScrollBeginDrag={() => setShowAddMenu(false)}
         onTouchStart={handleWardrobeTouchStart as any}
         onTouchMove={handleWardrobeTouchMove as any}
         onTouchEnd={handleWardrobeTouchEnd as any}
@@ -2837,9 +2861,9 @@ export default function App() {
     <View style={styles.lookbookContainer}>
       <View style={styles.lookbookHeaderRow}>
         <View style={styles.lookbookHeader}>
-          <Text style={styles.lookbookHeaderTitle}>Lookbook</Text>
+          <Text style={styles.lookbookHeaderTitle}>Combine</Text>
           <Text style={styles.lookbookHeaderBody}>
-            Visual outfits arranged top-to-bottom for quick browsing.
+            Auto-generated outfit combinations from your wardrobe.
           </Text>
         </View>
         <Pressable
@@ -3108,8 +3132,22 @@ export default function App() {
         <View style={styles.emptyLookbook}>
           <Text style={styles.emptyLookbookTitle}>No looks yet</Text>
           <Text style={styles.emptyLookbookBody}>
-            Classify items in Wardrobe, then tap Refresh Looks.
+            Tap Generate to create outfit combinations from your wardrobe.
           </Text>
+          <Pressable
+            style={[
+              styles.combinatorButton,
+              styles.lookbookGenerateButton,
+              isGeneratingCombos ? styles.combinatorButtonDisabled : null,
+              { marginTop: 16 },
+            ]}
+            onPress={handleGenerateCombos}
+            disabled={isGeneratingCombos}
+          >
+            <Text style={styles.lookbookGenerateButtonText}>
+              {isGeneratingCombos ? 'Generating...' : 'Generate Looks'}
+            </Text>
+          </Pressable>
         </View>
       )}
     </View>
@@ -3286,19 +3324,6 @@ export default function App() {
 
       <View style={styles.tabBar}>
         <Pressable
-          style={[styles.tabButton, activeTab === 'camera' ? styles.tabButtonActive : null]}
-          onPress={() => setActiveTab('camera')}
-        >
-          <Text
-            style={[
-              styles.tabButtonText,
-              activeTab === 'camera' ? styles.tabButtonTextActive : null,
-            ]}
-          >
-            Camera
-          </Text>
-        </Pressable>
-        <Pressable
           style={[styles.tabButton, activeTab === 'wardrobe' ? styles.tabButtonActive : null]}
           onPress={() => setActiveTab('wardrobe')}
         >
@@ -3324,36 +3349,32 @@ export default function App() {
             Try-On
           </Text>
         </Pressable>
-        {DEVELOPER_MODE ? (
-          <>
-            <Pressable
-              style={[styles.tabButton, activeTab === 'lookbook' ? styles.tabButtonActive : null]}
-              onPress={() => setActiveTab('lookbook')}
-            >
-              <Text
-                style={[
-                  styles.tabButtonText,
-                  activeTab === 'lookbook' ? styles.tabButtonTextActive : null,
-                ]}
-              >
-                Lookbook
-              </Text>
-            </Pressable>
-            <Pressable
-              style={[styles.tabButton, activeTab === 'tryons' ? styles.tabButtonActive : null]}
-              onPress={() => setActiveTab('tryons')}
-            >
-              <Text
-                style={[
-                  styles.tabButtonText,
-                  activeTab === 'tryons' ? styles.tabButtonTextActive : null,
-                ]}
-              >
-                History
-              </Text>
-            </Pressable>
-          </>
-        ) : null}
+        <Pressable
+          style={[styles.tabButton, activeTab === 'lookbook' ? styles.tabButtonActive : null]}
+          onPress={() => setActiveTab('lookbook')}
+        >
+          <Text
+            style={[
+              styles.tabButtonText,
+              activeTab === 'lookbook' ? styles.tabButtonTextActive : null,
+            ]}
+          >
+            Combine
+          </Text>
+        </Pressable>
+        <Pressable
+          style={[styles.tabButton, activeTab === 'tryons' ? styles.tabButtonActive : null]}
+          onPress={() => setActiveTab('tryons')}
+        >
+          <Text
+            style={[
+              styles.tabButtonText,
+              activeTab === 'tryons' ? styles.tabButtonTextActive : null,
+            ]}
+          >
+            History
+          </Text>
+        </Pressable>
       </View>
 
       <Modal
@@ -3459,12 +3480,28 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 16,
     left: 16,
+    right: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  cameraBackButton: {
+    backgroundColor: 'rgba(2, 6, 23, 0.72)',
+    borderRadius: 999,
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+  },
+  cameraBackButtonText: {
+    color: '#f8fafc',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  overlayText: {
     backgroundColor: 'rgba(2, 6, 23, 0.72)',
     borderRadius: 999,
     paddingVertical: 6,
     paddingHorizontal: 10,
-  },
-  overlayText: {
+    overflow: 'hidden',
     color: '#f8fafc',
     fontWeight: '600',
     fontSize: 13,
@@ -4819,6 +4856,27 @@ const styles = StyleSheet.create({
     color: '#e2e8f0',
     fontSize: 14,
     fontWeight: '700',
+  },
+  addMenuDropdown: {
+    backgroundColor: '#1e293b',
+    borderRadius: 12,
+    marginHorizontal: 16,
+    marginBottom: 8,
+    overflow: 'hidden',
+  },
+  addMenuOption: {
+    paddingVertical: 14,
+    paddingHorizontal: 18,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#334155',
+  },
+  addMenuOptionDisabled: {
+    opacity: 0.5,
+  },
+  addMenuOptionText: {
+    color: '#e2e8f0',
+    fontSize: 16,
+    fontWeight: '500',
   },
   zoomHintRow: {
     flexDirection: 'row',

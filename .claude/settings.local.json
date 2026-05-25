@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd \"/Users/patrick.reinbold/code/wardrobe-manager/mobile app\" && npx tsc --noEmit 2>&1 | head -60)",
+      "Bash(cd \"/Users/patrick.reinbold/code/wardrobe-manager/mobile app\" && npx expo export --platform ios 2>&1 | tail -10)",
+      "Bash(cd \"/Users/patrick.reinbold/code/wardrobe-manager/mobile app\" && npx tsc --noEmit 2>&1 | head -20)",
+      "Bash(cd \"/Users/patrick.reinbold/code/wardrobe-manager/mobile app\" && npx expo export --platform ios 2>&1 | tail -5)",
+      "Bash(npx tsc:*)"
+    ]
+  }
+}

@@ -19,9 +19,20 @@ A working Expo/React Native mobile app (iOS) for wardrobe management and virtual
 
 ### Navigation
 
-Five tabs: Camera, **Wardrobe** (default), Try-On Studio, Lookbook (dev), History (dev).
+Four tabs: **Wardrobe** (default), Try-On Studio, Combine, History.
 
-### What Changed This Session
+Camera is accessed via the "+" button in the wardrobe header (dropdown with "Take Photo" / "Choose from Library"). Camera auto-returns to wardrobe after capture.
+
+### What Changed — Latest Session (2026-03-25)
+
+1. **Combinator exposed to users** — Lookbook and History tabs removed from `DEVELOPER_MODE` gate, now always visible in tab bar.
+2. **Lookbook renamed to "Combine"** — header and tab label updated. Empty state now has a "Generate Looks" button with clear instructions.
+3. **Camera tab removed from tab bar** — camera is now accessed via the "+" dropdown in wardrobe header.
+4. **"+" dropdown menu** added to wardrobe — options: "Take Photo" (opens camera) and "Choose from Library" (imports from photos). Dropdown dismisses on scroll.
+5. **Camera "Back" button** — pill-shaped back button in camera overlay to return to wardrobe without capturing.
+6. **Camera auto-return** — after successful photo capture, automatically navigates back to wardrobe tab.
+
+### What Changed — Previous Session
 
 1. **Wardrobe screen redesigned** from card-based list to iOS Photos-style visual grid. Old implementation backed up to `src/wardrobeClassicView.tsx`.
 2. **Detail modal** added — tapping a photo shows full-size image with classification details, color chips, material/fit/tags, select/delete actions.
@@ -59,8 +70,10 @@ docs/
 
 ## Known Gaps
 
-- No initial commit yet — all files are untracked.
-- All UI lives in one 5,100-line file. Will need extraction as it grows.
+- All UI lives in one ~5,100-line file. Will need extraction as it grows.
 - No test coverage.
 - API keys are client-side (needs token proxy for production).
 - No onboarding flow in the app itself — the scanning guide is documentation only, not in-app UI.
+- Combinator rules are hardcoded (color harmony, insulation). User-defined rules planned as future feature.
+- Combo visualizations (beyond the item grid cards) not yet implemented.
+- Try-on renders are linked to combo IDs (deterministic tuple of item IDs) — renders persist but only surface when the same combo is regenerated or via the History tab.
